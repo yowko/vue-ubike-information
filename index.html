@@ -6,36 +6,139 @@
   <title>YouBike 臺北市公共自行車即時資訊</title>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  
   <style>
     body{ padding: 1em;  }
+    .fa.fa-times-circle-o {
+        position: absolute;
+        right: 5px;
+        top: 0;
+        bottom: 0;
+        height: 1em;
+        margin: auto;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #ccc;
+    }
+    .form-search {
+    line-height: 1.25;
+    border: 1px solid rgba(0,0,0,.15);
+    }
+    .actinactive
+    {
+      background-color: #FFCCBC!important;
+    }
+    .fa-sort-desc
+    {
+      color:#FCE4EC;
+    }
+    .fa-sort-desc:hover,.fa-sort-desc.active
+    {
+      color: #E91E63;
+    }
+    .fa-sort-asc
+    {
+      color: #E0F7FA;
+    }
+    .fa-sort-asc:hover,.fa-sort-asc.active
+    {
+      color:#00BCD4;
+    }
   </style>
 
 </head>
 <body>
-
   <h1>YouBike 臺北市公共自行車即時資訊</h1>
-
-  <div id="app">
-
+  
+  <div id="app" >
+    <div class="container">
+      <div class="row">
+          <div class="col-md-3 ml-md-auto">
+            <label>
+              <span v-show="!isEN">語言：</span>
+              <span  v-show="isEN">Language：</span>
+            </label>
+            <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary">
+          </div>
+    </div>
+  </div>
     <table class="table table-striped">
       <thead>
-        <tr>
-          <th>#</th>
-          <th>場站名稱</th>
-          <th>場站區域</th>
-          <th>目前可用車輛</th>
-          <th>總停車格</th>
-          <th>資料更新時間</th>
+        <tr v-show="!isEN">
+          <th ><i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>#<i class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sno==="desc"} aria-hidden="true" @click="DESC('sno')"></i></th>
+          <th title="act"><i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>狀態<i class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i></th>
+          <th title="sna">場站名稱<br/>
+            <div class="btn-group">
+                <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.sna">
+                <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sna')"></i>
+            </div>
+          </th>
+          <th title="sarea">場站區域<br/>
+            <div class="btn-group">
+                <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.sarea">
+                <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sarea')"></i>
+            </div>
+          </th>
+          <th title="ar">地址<br/>
+            <div class="btn-group">
+                <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.ar">
+                <i class="fa fa-times-circle-o" aria-hidden="true"  @click="ClearSearch('ar')"></i>
+            </div>
+          </th>
+          <!--<th title="latlan">經緯度</th>-->
+          <th title="sbi">目前可用車輛</th>
+          <th title="tot">總停車格</th>
+          <!--<th title="bemp">空位數量</th>-->
+          <th title="mday">資料更新時間</th>
+        </tr>
+        <tr v-show="isEN">
+            <th>#</th>
+            <th title="act"><i title="sort-asc" class="fa fa-sort-asc fa-2" aria-hidden="true"></i>Status<i class="fa fa-sort-desc" aria-hidden="true"></i></th>
+            <th title="snaen">Site Name<br/>
+              <div class="btn-group">
+                  <input type="search" class="form-search" placeholder="Search" v-model="searchdata.snaen">
+                  <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('snaen')"></i>
+              </div>
+            </th>
+            <th title="sareaen">Area<br/>
+              <div class="btn-group">
+                  <input type="search" class="form-search" placeholder="Search" v-model="searchdata.sareaen">
+                  <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sareaen')"></i>
+              </div>
+            </th>
+            <th title="aren">Address<br/>
+              <div class="btn-group">
+                  <input type="search" class="form-search" placeholder="Search" v-model="searchdata.aren">
+                  <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('aren')"></i>
+              </div>
+            </th>
+            <!--<th title="latlan"> Latitude and longitude</th>-->
+            <th title="sbi">Availables</th>
+            <th title="tot">Total</th>
+            <!--<th title="bemp">Empty psaces</th>-->
+            <th title="mday">Update Time</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="s in ubikeStops">
+        <tr :class="{ actinactive: (s.act==='0')}" v-for="s in filteredStops">
           <td>{{ s.sno }}</td>
-          <td>{{ s.sna }}</td>
-          <td>{{ s.sarea }}</td>
+          <td><!--{{ s.act|isActive }}-->
+            <i v-if="s.act==='0'" class="fa fa-minus-circle" style="color:red" aria-hidden="true"></i>
+            <i v-if="s.act==='1'" class="fa fa-check-circle" style="color:green" aria-hidden="true"></i>
+            <i v-if="s.act!=='1' && s.act!=='0'" class="fa fa-exclamation-triangle" style="color:#FC0" aria-hidden="true" title="unknow"></i>
+          </td>
+          <td v-show="!isEN">{{ s.sna }}</td>
+          <td v-show="isEN">{{ s.snaen }}</td>
+          <td v-show="!isEN">{{ s.sarea }}</td>
+          <td v-show="isEN">{{ s.sareaen }}</td>
+          <td v-show="!isEN">{{ s.ar }}</td>
+          <td v-show="isEN">{{ s.aren }}</td>
+          <!--<td>{{ s.lng }},{{ s.lat }}</td>-->
           <td>{{ s.sbi }}</td>
           <td>{{ s.tot }}</td>
+          <!--<td>{{ s.bemp }}</td>-->
           <td>{{ s.mday | timeFormat }}</td>
         </tr>
       </tbody>
@@ -46,6 +149,11 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <script src="scripts.js"></script>
 
 </body>

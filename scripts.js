@@ -1,7 +1,89 @@
 var vm = new Vue({
     el: '#app',
     data: {
-        ubikeStops: []
+        ubikeStops: [],
+        isEN:false,
+        searchsna:"",
+        searchdata:{
+            sna:"",
+            sarea:"",
+            ar:"",
+            snaen:"",
+            sareaen:"",
+            aren:""
+        },
+        sortdata:{
+            sno:"",
+            act:""
+        }
+    },
+    computed:{
+        filteredStops(){
+            let tempstops=this.ubikeStops;
+            if(this.isEN)
+            {
+                if(this.searchdata.snaen!=="")
+                    {
+                        tempstops=tempstops.filter((d)=>{return d.snaen.toUpperCase().indexOf(this.searchdata.snaen.toUpperCase())>-1});
+                    }
+                    if(this.searchdata.sareaen!=="")
+                        {
+                            tempstops=tempstops.filter((d)=>{return d.sareaen.toUpperCase().indexOf(this.searchdata.sareaen.toUpperCase())>-1});
+                        }
+                    if(this.searchdata.aren!=="")
+                        {
+                            tempstops=tempstops.filter((d)=>{return d.aren.toUpperCase().indexOf(this.searchdata.aren.toUpperCase())>-1});
+                        }
+            }
+            else{
+                
+                if(this.searchdata.sna!=="")
+                {
+                    tempstops=tempstops.filter((d)=>{return d.sna.toUpperCase().indexOf(this.searchdata.sna.toUpperCase())>-1});
+                }
+                if(this.searchdata.sarea!=="")
+                    {
+                        tempstops=tempstops.filter((d)=>{return d.sarea.toUpperCase().indexOf(this.searchdata.sarea.toUpperCase())>-1});
+                    }
+                if(this.searchdata.ar!=="")
+                    {
+                        tempstops=tempstops.filter((d)=>{return d.ar.toUpperCase().indexOf(this.searchdata.ar.toUpperCase())>-1});
+                    }
+            }
+            if(this.sortdata.sno && this.sortdata.sno!=="")
+                {
+                if(this.sortdata.sno==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"sno",true);
+                    }
+                else
+                    {
+                        tempstops=sortByKey(tempstops,"sno",false);
+                    }
+            }
+            if(this.sortdata.act && this.sortdata.act!=="")
+                {
+                if(this.sortdata.act===""||this.sortdata.act==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"act",false);
+                    }
+                else
+                    {
+                        tempstops=sortByKey(tempstops,"act",true);
+                    }
+            }
+            return tempstops;
+        },
+        filteredSNA(){
+            return (this.searchsna==="")
+            ?this.ubikeStops
+            :this.ubikeStops.filter(
+              (d)=>{return d.sna.toUpperCase().indexOf(this.searchsna.toUpperCase())>-1}
+              // function(d){
+              //   return d.name.indexOf(searchname)>-1;
+              // }
+              )
+          }
     },
     filters: {
       timeFormat(t){
@@ -16,7 +98,30 @@ var vm = new Vue({
         time.push(t.substr(12, 2));
 
         return date.join("/") + ' ' + time.join(":");
+      },
+      isActive(val)
+      {
+          if(this.isEN)
+            return val==="1"?"Active":"Inactive";
+          else
+          return val==="1"?"正常營運":"暫停營運";
       }
+    },
+    methods:{
+        SetEN(){
+            this.isEN=!this.isEN;
+        },
+        ClearSearch(val){
+            this.searchdata[val]="";
+        },
+        ASC(val){
+            this.sortdata={};
+            this.sortdata[val]="asc";
+        },
+        DESC(val){
+            this.sortdata={};
+            this.sortdata[val]="desc";
+        }
     },
     created() {
 
@@ -36,5 +141,32 @@ var vm = new Vue({
 
             });
 
+    },
+    mounted()    {
+        $(function() {
+            $('#setEN').bootstrapToggle({
+            });
+            $('#setEN').change(function() {
+                vm.SetEN();
+              })
+          })
     }
 });
+
+function sortByKey(array, key,reverse) {
+    if(reverse)
+        {
+            return array.sort(function(a, b) {
+                var x = a[key]; var y = b[key];
+                return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+            }); 
+        }
+    else
+        {
+            return array.reverse(function(a, b) {
+                var x = a[key]; var y = b[key];
+                return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+            });
+        
+    }
+}
