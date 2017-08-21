@@ -48,31 +48,39 @@
     }
     .hidebtn
     {
-      margin-left: 1em;
+      margin-left: .5em;
     }
   </style>
 
 </head>
 <body>
   <h1>YouBike 臺北市公共自行車即時資訊</h1>
-  <!--todo: paging(change pagecount) hidecol-->
   <div id="app" >
     <div class="container">
-      <div class="row">
-          <div class="col-md-9">
+      <div class="row" style="max-width:100%">
+          <div class="col">
+              <label>
+                <span v-show="!isEN">顯示語言：</span>
+                <span  v-show="isEN">Language：</span>
+              </label>
+              <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary">
+            </div>
+          <div class="col">
               <label>
                 <span v-show="!isEN">隱藏欄位：</span>
                 <span  v-show="isEN">Hide Column：</span>
               </label>
-              <!-- <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary"> -->
-              <a class="btn btn-warning hidebtn" v-for="(item,index) in hideCols" @click.prevent="show(index)"> {{item}} </a>
+              <a class="btn btn-warning hidebtn" v-for="(item,index) in hideCols" @click.prevent="show(index)"> {{displayCol(item)}} </a>
             </div>
-          <div class="col-md-3 ml-md-auto">
+          <div class="col">
             <label>
-              <span v-show="!isEN">顯示語言：</span>
-              <span  v-show="isEN">Language：</span>
+              <span v-show="!isEN">單頁筆數：</span>
+              <span  v-show="isEN">PageCount：</span>
             </label>
-            <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary">
+            <template v-for="item in pageCounts">
+                <a class="btn btn-secondary" :class={'btn-success':pagecountdis(item)} @click.prevent="setPageCount(item)"> {{showPage(item)}} </a>
+            </template>
+            
           </div>
     </div>
   </div>
@@ -81,17 +89,17 @@
         <tr v-show="!isEN">
           <th v-show="hideCols.indexOf('sno')<=-1">
             <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>
-            <a @click.prevent=hide('sno')>#</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('sno')>{{displayCol('sno')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sno==="desc"} aria-hidden="true" @click="DESC('sno')"></i>
           </th>
           <th title="act" v-show="hideCols.indexOf('act')<=-1">
             <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>
-            <a @click.prevent=hide('act')>狀態</a>
+            <a class="btn btn-warning" href="#" @click.prevent=hide('act')>{{displayCol('act')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i>
           </th>
           <th title="sna" v-show="hideCols.indexOf('sna')<=-1">
             <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sna==="asc"} aria-hidden="true" @click="ASC('sna')"></i>
-            <a @click.prevent=hide('sna')>場站名稱</a>
+            <a class="btn btn-warning" href="#" @click.prevent=hide('sna')>{{displayCol('sna')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
             <br/>
             <div class="btn-group">
@@ -101,7 +109,7 @@
           </th>
           <th title="sarea" v-show="hideCols.indexOf('sarea')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sarea==="asc"} aria-hidden="true" @click="ASC('sarea')"></i>  
-              <a @click.prevent=hide('sarea')>場站區域</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('sarea')>{{displayCol('sarea')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sarea==="desc"} aria-hidden="true" @click="DESC('sarea')"></i>
             <br/>
             <div class="btn-group">
@@ -111,7 +119,7 @@
           </th>
           <th title="ar" v-show="hideCols.indexOf('ar')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.ar==="asc"} aria-hidden="true" @click="ASC('ar')"></i>  
-              <a @click.prevent=hide('ar')>地址</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('ar')>{{displayCol('ar')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.ar==="desc"} aria-hidden="true" @click="DESC('ar')"></i>
             <br/>
             <div class="btn-group">
@@ -121,44 +129,44 @@
           </th>
           <th title="latlan" v-show="hideCols.indexOf('lat')<=-1">
             <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.lat==="asc"} aria-hidden="true" @click="ASC('lat')"></i>
-            <a @click.prevent=hide('lat')>經緯度</a>
+            <a class="btn btn-warning" href="#" @click.prevent=hide('lat')>{{displayCol('lat')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.lat==="desc"} aria-hidden="true" @click="DESC('lat')"></i>
           </th>
           <th title="sbi" v-show="hideCols.indexOf('sbi')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sbi==="asc"} aria-hidden="true" @click="ASC('sbi')"></i>
-              <a @click.prevent=hide('sbi')>目前可用車輛</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('sbi')>{{displayCol('sbi')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sbi==="desc"} aria-hidden="true" @click="DESC('sbi')"></i>
           </th>
           <th title="tot" v-show="hideCols.indexOf('tot')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.tot==="asc"} aria-hidden="true" @click="ASC('tot')"></i>
-              <a @click.prevent=hide('tot')>總停車格</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('tot')>{{displayCol('tot')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.tot==="desc"} aria-hidden="true" @click="DESC('tot')"></i>
           </th>
           <th title="bemp" v-show="hideCols.indexOf('bemp')<=-1">
             <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.bemp==="asc"} aria-hidden="true" @click="ASC('bemp')"></i>
-            <a @click.prevent=hide('bemp')>空位數量</a>
+            <a class="btn btn-warning" href="#" @click.prevent=hide('bemp')>{{displayCol('bemp')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.bemp==="desc"} aria-hidden="true" @click="DESC('bemp')"></i>
           </th>
           <th title="mday" v-show="hideCols.indexOf('mday')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.mday==="asc"} aria-hidden="true" @click="ASC('mday')"></i>
-              <a @click.prevent=hide('mday')>資料更新時間</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('mday')>{{displayCol('mday')}}</a>
             <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.mday==="desc"} aria-hidden="true" @click="DESC('mday')"></i>
           </th>
         </tr>
         <tr v-show="isEN">
             <th v-show="hideCols.indexOf('sno')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>
-                <a @click.prevent=hide('sno')>#</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('sno')>{{displayCol('sno')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
             </th>
             <th title="act" v-show="hideCols.indexOf('act')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>
-                <a @click.prevent=hide('act')>Status</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('act')>{{displayCol('act')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i>
             </th>
             <th title="snaen" v-show="hideCols.indexOf('snaen')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.snaen==="asc"} aria-hidden="true" @click="ASC('snaen')"></i>
-                <a @click.prevent=hide('snaen')>Site Name</a>
+                <a class="btn btn-warning" @click.prevent=hide('snaen')>{{displayCol('snaen')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.snaen==="desc"} aria-hidden="true" @click="DESC('snaen')"></i>
               <br/>
               <div class="btn-group">
@@ -168,7 +176,7 @@
             </th>
             <th title="sareaen" v-show="hideCols.indexOf('sareaen')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sareaen==="asc"} aria-hidden="true" @click="ASC('sareaen')"></i>
-                <a @click.prevent=hide('sareaen')>Area</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('sareaen')>{{displayCol('sareaen')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
               <br/>
               <div class="btn-group">
@@ -178,7 +186,7 @@
             </th>
             <th title="aren" v-show="hideCols.indexOf('aren')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.aren==="asc"} aria-hidden="true" @click="ASC('aren')"></i>
-                <a @click.prevent=hide('aren')>Address</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('aren')>{{displayCol('aren')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.aren==="desc"} aria-hidden="true" @click="DESC('aren')"></i>
               <br/>
               <div class="btn-group">
@@ -188,33 +196,33 @@
             </th>
             <th title="latlan" v-show="hideCols.indexOf('lat')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.lat==="asc"} aria-hidden="true" @click="ASC('lat')"></i>
-              <a @click.prevent=hide('lat')>Latitude and longitude</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('lat')>{{displayCol('lat')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.lat==="desc"} aria-hidden="true" @click="DESC('lat')"></i>
             </th>
             <th title="sbi" v-show="hideCols.indexOf('sbi')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sbi==="asc"} aria-hidden="true" @click="ASC('sbi')"></i>
-                <a @click.prevent=hide('sbi')>Availables</a>
+                <a class="btn btn-warning" @click.prevent=hide('sbi')>{{displayCol('sbi')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sbi==="desc"} aria-hidden="true" @click="DESC('sbi')"></i>
             </th>
             <th title="tot" v-show="hideCols.indexOf('tot')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.tot==="asc"} aria-hidden="true" @click="ASC('tot')"></i>
-                <a @click.prevent=hide('tot')>Total</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('tot')>{{displayCol('tot')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.tot==="desc"} aria-hidden="true" @click="DESC('tot')"></i>
             </th>
             <th title="bemp" v-show="hideCols.indexOf('bemp')<=-1">
               <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.bemp==="asc"} aria-hidden="true" @click="ASC('bemp')"></i>
-              <a @click.prevent=hide('bemp')>Empty psaces</a>
+              <a class="btn btn-warning" href="#" @click.prevent=hide('bemp')>{{displayCol('bemp')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.bemp==="desc"} aria-hidden="true" @click="DESC('bemp')"></i>
             </th>
             <th title="mday" v-show="hideCols.indexOf('mday')<=-1">
                 <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.mday==="asc"} aria-hidden="true" @click="ASC('mday')"></i>
-                <a @click.prevent=hide('mday')>Update Time</a>
+                <a class="btn btn-warning" href="#" @click.prevent=hide('mday')>{{displayCol('mday')}}</a>
               <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.mday==="desc"} aria-hidden="true" @click="DESC('mday')"></i>
             </th>
         </tr>
       </thead>
       <tbody>
-        <tr :class="{ actinactive: (s.act==='0')}" v-for="s in filteredStops">
+        <tr :class="{ actinactive: (s.act==='0')}" v-for="s in pagedstops">
           <td v-show="hideCols.indexOf('sno')<=-1">{{ s.sno }}</td>
           <td v-show="hideCols.indexOf('act')<=-1"><!--{{ s.act|isActive }}-->
             <i v-if="s.act==='0'" class="fa fa-minus-circle" style="color:red" aria-hidden="true"></i>
@@ -236,7 +244,19 @@
       </tbody>
 
     </table>
-
+    <ul class="pagination">
+      <li v-show="currentPage!==1">
+        <a class="btn btn-default" href="#" @click="goto(currentPage-1)" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li v-for="n in totalPage"><a @click.prevent="goto(n)" class="btn btn-default" href="#">{{n}}</a></li>
+      <li v-show="currentPage!==totalPage">
+        <a class="btn btn-default" href="#"  @click="goto(currentPage+1)" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>

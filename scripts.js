@@ -3,7 +3,6 @@ var vm = new Vue({
     data: {
         ubikeStops: [],
         isEN:false,
-        searchsna:"",
         searchdata:{
             sna:"",
             sarea:"",
@@ -13,7 +12,34 @@ var vm = new Vue({
             aren:""
         },
         sortdata:{},
-        hideCols:['lat','bemp']
+        hideCols:['lat','bemp'],
+        currentPage:1,
+        pageCount:20,
+        pageCounts:[20,30,50,0],
+        colNames:{
+            'sno':'#',
+            'act':'狀態',
+            'sna':'場站名稱',
+            'sarea':'場站區域',
+            'ar':'地址',
+            'lat':'經緯度',
+            'sbi':'目前可用車輛',
+            'tot':'總停車格',
+            'bemp':'空位數量',
+            'mday':'資料更新時間'
+        },
+        colENNames:{
+            'sno':'#',
+            'act':'Status',
+            'snaen':'Site Name',
+            'sareaen':'Area',
+            'aren':'Address',
+            'lat':'Latitude and longitude',
+            'sbi':'Availables',
+            'tot':'Total',
+            'bemp':'Empty psaces',
+            'mday':'Update Time'
+        }
     },
     computed:{
         filteredStops(){
@@ -22,14 +48,17 @@ var vm = new Vue({
             {
                 if(this.searchdata.snaen!=="")
                     {
+                        this.currentPage=1;
                         tempstops=tempstops.filter((d)=>{return d.snaen.toUpperCase().indexOf(this.searchdata.snaen.toUpperCase())>-1});
                     }
                 if(this.searchdata.sareaen!=="")
                     {
+                        this.currentPage=1;
                         tempstops=tempstops.filter((d)=>{return d.sareaen.toUpperCase().indexOf(this.searchdata.sareaen.toUpperCase())>-1});
                     }
                 if(this.searchdata.aren!=="")
                     {
+                        this.currentPage=1;
                         tempstops=tempstops.filter((d)=>{return d.aren.toUpperCase().indexOf(this.searchdata.aren.toUpperCase())>-1});
                     }
             }
@@ -37,14 +66,17 @@ var vm = new Vue({
                 
                 if(this.searchdata.sna!=="")
                 {
+                    this.currentPage=1;
                     tempstops=tempstops.filter((d)=>{return d.sna.toUpperCase().indexOf(this.searchdata.sna.toUpperCase())>-1});
                 }
                 if(this.searchdata.sarea!=="")
                     {
+                        this.currentPage=1;
                         tempstops=tempstops.filter((d)=>{return d.sarea.toUpperCase().indexOf(this.searchdata.sarea.toUpperCase())>-1});
                     }
                 if(this.searchdata.ar!=="")
                     {
+                        this.currentPage=1;
                         tempstops=tempstops.filter((d)=>{return d.ar.toUpperCase().indexOf(this.searchdata.ar.toUpperCase())>-1});
                     }
             }
@@ -207,6 +239,12 @@ var vm = new Vue({
             :this.ubikeStops.filter(
               (d)=>{return d.sna.toUpperCase().indexOf(this.searchsna.toUpperCase())>-1}
               )
+          },
+          pagedstops(){
+            return this.filteredStops.slice((this.currentPage-1)*this.pageCount,(this.currentPage-1)*this.pageCount+this.pageCount);
+          },
+        totalPage(){
+            return Math.ceil(this.filteredStops.length/this.pageCount);
           }
     },
     filters: {
@@ -228,19 +266,45 @@ var vm = new Vue({
           if(this.isEN)
             return val==="1"?"Active":"Inactive";
           else
-          return val==="1"?"正常營運":"暫停營運";
+            return val==="1"?"正常營運":"暫停營運";
       }
     },
     methods:{
+        showPage(val){
+          if(val===0)
+              {
+                   if(this.isEN){
+                       return "all";
+                   }
+                   else{
+                        return "全部";
+                    }
+              }
+          else{
+                  return val;
+              }
+        },
+        setPageCount(val){
+            if(val!==0)
+            {
+            this.pageCount=val; 
+            }
+            else{
+                this.pageCount=5000; 
+            }
+        },
         SetEN(){
+            this.currentPage=1;
             this.isEN=!this.isEN;
         },
         ClearSearch(val){
+            this.currentPage=1;
             this.searchdata[val]="";
         },
         ASC(val){
             if(this.sortdata[val]!=="asc")
                 {
+            this.currentPage=1;
             this.sortdata={};
             this.sortdata[val]="asc";
         }
@@ -248,6 +312,7 @@ var vm = new Vue({
         DESC(val){
             if(this.sortdata[val]!=="desc")
                 {
+            this.currentPage=1;
             this.sortdata={};
             this.sortdata[val]="desc";
                 }
@@ -257,6 +322,23 @@ var vm = new Vue({
         },
         hide(val){
             this.hideCols.push(val);
+        },
+        goto(val)
+        {
+            this.currentPage=val;
+        },
+        pagecountdis(val)
+        {
+            return (this.pageCount===val || (val===0 && this.pageCount===5000))
+        },
+        displayCol(val)
+        {
+            if(this.isEN){
+                return this.colENNames[val];
+            }
+            else{
+                 return this.colNames[val];
+             }
         }
     },
     created() {
