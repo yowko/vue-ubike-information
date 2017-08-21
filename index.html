@@ -46,18 +46,30 @@
     {
       color:#00BCD4;
     }
+    .hidebtn
+    {
+      margin-left: 1em;
+    }
   </style>
 
 </head>
 <body>
   <h1>YouBike 臺北市公共自行車即時資訊</h1>
-  
+  <!--todo: paging(change pagecount) hidecol-->
   <div id="app" >
     <div class="container">
       <div class="row">
+          <div class="col-md-9">
+              <label>
+                <span v-show="!isEN">隱藏欄位：</span>
+                <span  v-show="isEN">Hide Column：</span>
+              </label>
+              <!-- <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary"> -->
+              <a class="btn btn-warning hidebtn" v-for="(item,index) in hideCols" @click.prevent="show(index)"> {{item}} </a>
+            </div>
           <div class="col-md-3 ml-md-auto">
             <label>
-              <span v-show="!isEN">語言：</span>
+              <span v-show="!isEN">顯示語言：</span>
               <span  v-show="isEN">Language：</span>
             </label>
             <input  id="setEN" v-model="isEN" @change="SetEN()" type="checkbox" data-toggle="toggle" data-on="English" data-off="中文" data-offstyle="success" data-onstyle="primary">
@@ -67,79 +79,159 @@
     <table class="table table-striped">
       <thead>
         <tr v-show="!isEN">
-          <th ><i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>#<i class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sno==="desc"} aria-hidden="true" @click="DESC('sno')"></i></th>
-          <th title="act"><i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>狀態<i class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i></th>
-          <th title="sna">場站名稱<br/>
+          <th v-show="hideCols.indexOf('sno')<=-1">
+            <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>
+            <a @click.prevent=hide('sno')>#</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sno==="desc"} aria-hidden="true" @click="DESC('sno')"></i>
+          </th>
+          <th title="act" v-show="hideCols.indexOf('act')<=-1">
+            <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>
+            <a @click.prevent=hide('act')>狀態</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i>
+          </th>
+          <th title="sna" v-show="hideCols.indexOf('sna')<=-1">
+            <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sna==="asc"} aria-hidden="true" @click="ASC('sna')"></i>
+            <a @click.prevent=hide('sna')>場站名稱</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
+            <br/>
             <div class="btn-group">
                 <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.sna">
                 <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sna')"></i>
             </div>
           </th>
-          <th title="sarea">場站區域<br/>
+          <th title="sarea" v-show="hideCols.indexOf('sarea')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sarea==="asc"} aria-hidden="true" @click="ASC('sarea')"></i>  
+              <a @click.prevent=hide('sarea')>場站區域</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sarea==="desc"} aria-hidden="true" @click="DESC('sarea')"></i>
+            <br/>
             <div class="btn-group">
                 <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.sarea">
                 <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sarea')"></i>
             </div>
           </th>
-          <th title="ar">地址<br/>
+          <th title="ar" v-show="hideCols.indexOf('ar')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.ar==="asc"} aria-hidden="true" @click="ASC('ar')"></i>  
+              <a @click.prevent=hide('ar')>地址</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.ar==="desc"} aria-hidden="true" @click="DESC('ar')"></i>
+            <br/>
             <div class="btn-group">
                 <input type="search" class="form-search" placeholder="搜尋" v-model="searchdata.ar">
                 <i class="fa fa-times-circle-o" aria-hidden="true"  @click="ClearSearch('ar')"></i>
             </div>
           </th>
-          <!--<th title="latlan">經緯度</th>-->
-          <th title="sbi">目前可用車輛</th>
-          <th title="tot">總停車格</th>
-          <!--<th title="bemp">空位數量</th>-->
-          <th title="mday">資料更新時間</th>
+          <th title="latlan" v-show="hideCols.indexOf('lat')<=-1">
+            <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.lat==="asc"} aria-hidden="true" @click="ASC('lat')"></i>
+            <a @click.prevent=hide('lat')>經緯度</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.lat==="desc"} aria-hidden="true" @click="DESC('lat')"></i>
+          </th>
+          <th title="sbi" v-show="hideCols.indexOf('sbi')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sbi==="asc"} aria-hidden="true" @click="ASC('sbi')"></i>
+              <a @click.prevent=hide('sbi')>目前可用車輛</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sbi==="desc"} aria-hidden="true" @click="DESC('sbi')"></i>
+          </th>
+          <th title="tot" v-show="hideCols.indexOf('tot')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.tot==="asc"} aria-hidden="true" @click="ASC('tot')"></i>
+              <a @click.prevent=hide('tot')>總停車格</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.tot==="desc"} aria-hidden="true" @click="DESC('tot')"></i>
+          </th>
+          <th title="bemp" v-show="hideCols.indexOf('bemp')<=-1">
+            <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.bemp==="asc"} aria-hidden="true" @click="ASC('bemp')"></i>
+            <a @click.prevent=hide('bemp')>空位數量</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.bemp==="desc"} aria-hidden="true" @click="DESC('bemp')"></i>
+          </th>
+          <th title="mday" v-show="hideCols.indexOf('mday')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.mday==="asc"} aria-hidden="true" @click="ASC('mday')"></i>
+              <a @click.prevent=hide('mday')>資料更新時間</a>
+            <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.mday==="desc"} aria-hidden="true" @click="DESC('mday')"></i>
+          </th>
         </tr>
         <tr v-show="isEN">
-            <th>#</th>
-            <th title="act"><i title="sort-asc" class="fa fa-sort-asc fa-2" aria-hidden="true"></i>Status<i class="fa fa-sort-desc" aria-hidden="true"></i></th>
-            <th title="snaen">Site Name<br/>
+            <th v-show="hideCols.indexOf('sno')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sno==="asc"} aria-hidden="true" @click="ASC('sno')"></i>
+                <a @click.prevent=hide('sno')>#</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
+            </th>
+            <th title="act" v-show="hideCols.indexOf('act')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.act==="asc"} aria-hidden="true" @click="ASC('act')"></i>
+                <a @click.prevent=hide('act')>Status</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.act==="desc"} aria-hidden="true" @click="DESC('act')"></i>
+            </th>
+            <th title="snaen" v-show="hideCols.indexOf('snaen')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.snaen==="asc"} aria-hidden="true" @click="ASC('snaen')"></i>
+                <a @click.prevent=hide('snaen')>Site Name</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.snaen==="desc"} aria-hidden="true" @click="DESC('snaen')"></i>
+              <br/>
               <div class="btn-group">
                   <input type="search" class="form-search" placeholder="Search" v-model="searchdata.snaen">
                   <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('snaen')"></i>
               </div>
             </th>
-            <th title="sareaen">Area<br/>
+            <th title="sareaen" v-show="hideCols.indexOf('sareaen')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sareaen==="asc"} aria-hidden="true" @click="ASC('sareaen')"></i>
+                <a @click.prevent=hide('sareaen')>Area</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sna==="desc"} aria-hidden="true" @click="DESC('sna')"></i>
+              <br/>
               <div class="btn-group">
                   <input type="search" class="form-search" placeholder="Search" v-model="searchdata.sareaen">
                   <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('sareaen')"></i>
               </div>
             </th>
-            <th title="aren">Address<br/>
+            <th title="aren" v-show="hideCols.indexOf('aren')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.aren==="asc"} aria-hidden="true" @click="ASC('aren')"></i>
+                <a @click.prevent=hide('aren')>Address</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.aren==="desc"} aria-hidden="true" @click="DESC('aren')"></i>
+              <br/>
               <div class="btn-group">
                   <input type="search" class="form-search" placeholder="Search" v-model="searchdata.aren">
                   <i class="fa fa-times-circle-o" aria-hidden="true" @click="ClearSearch('aren')"></i>
               </div>
             </th>
-            <!--<th title="latlan"> Latitude and longitude</th>-->
-            <th title="sbi">Availables</th>
-            <th title="tot">Total</th>
-            <!--<th title="bemp">Empty psaces</th>-->
-            <th title="mday">Update Time</th>
+            <th title="latlan" v-show="hideCols.indexOf('lat')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.lat==="asc"} aria-hidden="true" @click="ASC('lat')"></i>
+              <a @click.prevent=hide('lat')>Latitude and longitude</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.lat==="desc"} aria-hidden="true" @click="DESC('lat')"></i>
+            </th>
+            <th title="sbi" v-show="hideCols.indexOf('sbi')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.sbi==="asc"} aria-hidden="true" @click="ASC('sbi')"></i>
+                <a @click.prevent=hide('sbi')>Availables</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.sbi==="desc"} aria-hidden="true" @click="DESC('sbi')"></i>
+            </th>
+            <th title="tot" v-show="hideCols.indexOf('tot')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.tot==="asc"} aria-hidden="true" @click="ASC('tot')"></i>
+                <a @click.prevent=hide('tot')>Total</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.tot==="desc"} aria-hidden="true" @click="DESC('tot')"></i>
+            </th>
+            <th title="bemp" v-show="hideCols.indexOf('bemp')<=-1">
+              <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.bemp==="asc"} aria-hidden="true" @click="ASC('bemp')"></i>
+              <a @click.prevent=hide('bemp')>Empty psaces</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.bemp==="desc"} aria-hidden="true" @click="DESC('bemp')"></i>
+            </th>
+            <th title="mday" v-show="hideCols.indexOf('mday')<=-1">
+                <i title="sort-asc" class="fa fa-sort-asc fa-2x" :class={active:this.sortdata.mday==="asc"} aria-hidden="true" @click="ASC('mday')"></i>
+                <a @click.prevent=hide('mday')>Update Time</a>
+              <i title="sort-desc" class="fa fa-sort-desc fa-2x" :class={active:this.sortdata.mday==="desc"} aria-hidden="true" @click="DESC('mday')"></i>
+            </th>
         </tr>
       </thead>
       <tbody>
         <tr :class="{ actinactive: (s.act==='0')}" v-for="s in filteredStops">
-          <td>{{ s.sno }}</td>
-          <td><!--{{ s.act|isActive }}-->
+          <td v-show="hideCols.indexOf('sno')<=-1">{{ s.sno }}</td>
+          <td v-show="hideCols.indexOf('act')<=-1"><!--{{ s.act|isActive }}-->
             <i v-if="s.act==='0'" class="fa fa-minus-circle" style="color:red" aria-hidden="true"></i>
             <i v-if="s.act==='1'" class="fa fa-check-circle" style="color:green" aria-hidden="true"></i>
             <i v-if="s.act!=='1' && s.act!=='0'" class="fa fa-exclamation-triangle" style="color:#FC0" aria-hidden="true" title="unknow"></i>
           </td>
-          <td v-show="!isEN">{{ s.sna }}</td>
-          <td v-show="isEN">{{ s.snaen }}</td>
-          <td v-show="!isEN">{{ s.sarea }}</td>
-          <td v-show="isEN">{{ s.sareaen }}</td>
-          <td v-show="!isEN">{{ s.ar }}</td>
-          <td v-show="isEN">{{ s.aren }}</td>
-          <!--<td>{{ s.lng }},{{ s.lat }}</td>-->
-          <td>{{ s.sbi }}</td>
-          <td>{{ s.tot }}</td>
-          <!--<td>{{ s.bemp }}</td>-->
-          <td>{{ s.mday | timeFormat }}</td>
+          <td v-show="!isEN && hideCols.indexOf('sna')<=-1">{{ s.sna }}</td>
+          <td v-show="isEN && hideCols.indexOf('snaen')<=-1">{{ s.snaen }}</td>
+          <td v-show="!isEN && hideCols.indexOf('sarea')<=-1">{{ s.sarea }}</td>
+          <td v-show="isEN && hideCols.indexOf('sareaen')<=-1">{{ s.sareaen }}</td>
+          <td v-show="!isEN && hideCols.indexOf('ar')<=-1">{{ s.ar }}</td>
+          <td v-show="isEN && hideCols.indexOf('aren')<=-1">{{ s.aren }}</td>
+          <td v-show="hideCols.indexOf('lat')<=-1">{{ s.lng }},{{ s.lat }}</td>
+          <td v-show="hideCols.indexOf('sbi')<=-1">{{ s.sbi }}</td>
+          <td v-show="hideCols.indexOf('tot')<=-1">{{ s.tot }}</td>
+          <td v-show="hideCols.indexOf('bemp')<=-1">{{ s.bemp }}</td>
+          <td v-show="hideCols.indexOf('mday')<=-1">{{ s.mday | timeFormat }}</td>
         </tr>
       </tbody>
 

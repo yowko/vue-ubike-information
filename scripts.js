@@ -12,10 +12,8 @@ var vm = new Vue({
             sareaen:"",
             aren:""
         },
-        sortdata:{
-            sno:"",
-            act:""
-        }
+        sortdata:{},
+        hideCols:['lat','bemp']
     },
     computed:{
         filteredStops(){
@@ -26,14 +24,14 @@ var vm = new Vue({
                     {
                         tempstops=tempstops.filter((d)=>{return d.snaen.toUpperCase().indexOf(this.searchdata.snaen.toUpperCase())>-1});
                     }
-                    if(this.searchdata.sareaen!=="")
-                        {
-                            tempstops=tempstops.filter((d)=>{return d.sareaen.toUpperCase().indexOf(this.searchdata.sareaen.toUpperCase())>-1});
-                        }
-                    if(this.searchdata.aren!=="")
-                        {
-                            tempstops=tempstops.filter((d)=>{return d.aren.toUpperCase().indexOf(this.searchdata.aren.toUpperCase())>-1});
-                        }
+                if(this.searchdata.sareaen!=="")
+                    {
+                        tempstops=tempstops.filter((d)=>{return d.sareaen.toUpperCase().indexOf(this.searchdata.sareaen.toUpperCase())>-1});
+                    }
+                if(this.searchdata.aren!=="")
+                    {
+                        tempstops=tempstops.filter((d)=>{return d.aren.toUpperCase().indexOf(this.searchdata.aren.toUpperCase())>-1});
+                    }
             }
             else{
                 
@@ -50,28 +48,157 @@ var vm = new Vue({
                         tempstops=tempstops.filter((d)=>{return d.ar.toUpperCase().indexOf(this.searchdata.ar.toUpperCase())>-1});
                     }
             }
+
             if(this.sortdata.sno && this.sortdata.sno!=="")
                 {
                 if(this.sortdata.sno==="asc")
                     {
                         tempstops=sortByKey(tempstops,"sno",true);
                     }
-                else
+                if(this.sortdata.sno==="desc")
                     {
                         tempstops=sortByKey(tempstops,"sno",false);
                     }
             }
             if(this.sortdata.act && this.sortdata.act!=="")
                 {
-                if(this.sortdata.act===""||this.sortdata.act==="asc")
+                if(this.sortdata.act==="asc")
                     {
                         tempstops=sortByKey(tempstops,"act",false);
                     }
-                else
+                    if(this.sortdata.act==="desc")
                     {
                         tempstops=sortByKey(tempstops,"act",true);
                     }
             }
+            if(this.sortdata.sna && this.sortdata.sna!=="")
+                {
+                if(this.sortdata.sna==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"sna",true);
+                    }
+                    if(this.sortdata.sna==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"sna",false);
+                    }
+            }
+            if(this.sortdata.sarea && this.sortdata.sarea!=="")
+                {
+                if(this.sortdata.sarea==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"sarea",true);
+                    }
+                    if(this.sortdata.sarea==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"sarea",false);
+                    }
+            }
+            if(this.sortdata.ar && this.sortdata.ar!=="")
+                {
+                if(this.sortdata.ar==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"ar",true);
+                    }
+                    if(this.sortdata.ar==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"ar",false);
+                    }
+            }
+
+            //en start
+            if(this.sortdata.snaen && this.sortdata.snaen!=="")
+                {
+                if(this.sortdata.snaen==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"snaen",true);
+                    }
+                    if(this.sortdata.snaen==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"snaen",false);
+                    }
+            }
+            if(this.sortdata.sareaen && this.sortdata.sareaen!=="")
+                {
+                if(this.sortdata.sareaen==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"sareaen",true);
+                    }
+                    if(this.sortdata.sareaen==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"sareaen",false);
+                    }
+            }
+            if(this.sortdata.aren && this.sortdata.aren!=="")
+                {
+                if(this.sortdata.aren==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"aren",true);
+                    }
+                    if(this.sortdata.aren==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"aren",false);
+                    }
+            }
+
+            //en end
+
+            if(this.sortdata.lat && this.sortdata.lat!=="")
+                {
+                if(this.sortdata.lat==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"lat",true);
+                    }
+                    if(this.sortdata.lat==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"lat",false);
+                    }
+            }
+
+            if(this.sortdata.sbi && this.sortdata.sbi!=="")
+                {
+                if(this.sortdata.sbi==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"sbi",true);
+                    }
+                    if(this.sortdata.sbi==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"sbi",false);
+                    }
+            }
+            if(this.sortdata.tot && this.sortdata.tot!=="")
+                {
+                if(this.sortdata.tot==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"tot",true);
+                    }
+                    if(this.sortdata.tot==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"tot",false);
+                    }
+            }
+            if(this.sortdata.bemp && this.sortdata.bemp!=="")
+                {
+                if(this.sortdata.bemp==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"bemp",true);
+                    }
+                    if(this.sortdata.bemp==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"bemp",false);
+                    }
+            }
+            if(this.sortdata.mday && this.sortdata.mday!=="")
+                {
+                if(this.sortdata.mday==="asc")
+                    {
+                        tempstops=sortByKey(tempstops,"mday",true);
+                    }
+                    if(this.sortdata.mday==="desc")
+                    {
+                        tempstops=sortByKey(tempstops,"mday",false);
+                    }
+            }
+
             return tempstops;
         },
         filteredSNA(){
@@ -79,9 +206,6 @@ var vm = new Vue({
             ?this.ubikeStops
             :this.ubikeStops.filter(
               (d)=>{return d.sna.toUpperCase().indexOf(this.searchsna.toUpperCase())>-1}
-              // function(d){
-              //   return d.name.indexOf(searchname)>-1;
-              // }
               )
           }
     },
@@ -115,12 +239,24 @@ var vm = new Vue({
             this.searchdata[val]="";
         },
         ASC(val){
+            if(this.sortdata[val]!=="asc")
+                {
             this.sortdata={};
             this.sortdata[val]="asc";
+        }
         },
         DESC(val){
+            if(this.sortdata[val]!=="desc")
+                {
             this.sortdata={};
             this.sortdata[val]="desc";
+                }
+        },
+        show(val){
+            this.hideCols.splice(val,1);
+        },
+        hide(val){
+            this.hideCols.push(val);
         }
     },
     created() {
@@ -153,20 +289,32 @@ var vm = new Vue({
     }
 });
 
-function sortByKey(array, key,reverse) {
-    if(reverse)
+function sortByKey(array, key,asc) {
+    if(asc)
         {
             return array.sort(function(a, b) {
-                var x = a[key]; var y = b[key];
+                var x = a[key]; 
+                var y = b[key];
+                if(key==="sbi"||key==="tot"||key==="bemp")
+                    {
+                        x=+x;
+                        y=+y;
+                    }
+                
                 return ((x < y) ? -1 : ((x > y) ? 1 : 0));
             }); 
         }
     else
         {
             return array.reverse(function(a, b) {
-                var x = a[key]; var y = b[key];
+                var x = a[key]; 
+                var y = b[key];
+                if(key==="sbi"||key==="tot"||key==="bemp")
+                    {
+                        x=+x;
+                        y=+y;
+                    }
                 return ((x < y) ? -1 : ((x > y) ? 1 : 0));
             });
-        
     }
 }
